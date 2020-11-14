@@ -100,6 +100,7 @@
 		saveBtn=document.getElementById("saveBtn");
 		saveBtn.onclick=function(){
 			filename=prompt("Save as?");
+			filename=filename==null?"tasklist-"+(new Date).getTime():filename;
 			saveBtn.download=filename+".html";
 			this.href="data:text/html;charset=UTF-8,"+encodeURIComponent(document.documentElement.outerHTML);
 		};
