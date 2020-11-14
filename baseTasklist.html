@@ -6,12 +6,15 @@
 			<span class="nameBox">Click here to rename the task!</span>
 			<input class="nameEditor" style="display:none";></input>
 			<button class="newTaskBtn">&#x002B;</button>
-			<button class="collapseBtn" data-state="expanded">&#x25BC;</button>
+			<button class="collapseBtn" data-state="shown">&#x25BC;</button>
 			<button class="removeBtn" style="display:none">&#x2715;</button>
 			<div class="taskChildren"></div>
 		</div>
 	</body>
 	<script>
+	function isMobileDevice() {
+		return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);
+	};
 	nbFunc=function(self){
 		t=self.parentElement;
 		t.children[1].style.display="none";
@@ -23,7 +26,6 @@
 		t.children[1].innerText=t.children[2].value==""?"[Click here to rename!]":t.children[2].value;
 		t.children[1].style.display="inline";
 		t.children[2].style.display="none";
-		t.children[1].style.display="inline";
 		};
 	ntbFunc=function(self){
 		t=self.parentElement;
@@ -68,7 +70,7 @@
 		
 		newnb.addEventListener("click",function(){nbFunc(this)});
 		newne.addEventListener("change",function(){neFunc(this)});
-		newne.addEventListener("focusout",function(){neFunc(this)});
+		if(!isMobileDevice)newne.addEventListener("focusout",function(){neFunc(this)});
 		newntb.addEventListener("click",function(){ntbFunc(this)});
 		newcb.addEventListener("click",function(){cbFunc(this)});
 		newrm.addEventListener("click",function(){rmFunc(this)});
@@ -106,8 +108,8 @@
 		};
 		tasks=document.getElementsByClassName("task");
 		for(nb of document.getElementsByClassName("nameBox")){nb.addEventListener("click",function(){nbFunc(nb)});}
-		for(ne of document.getElementsByClassName("nameEditor")){ne.addEventListener("input",function(){neFunc(ne)});
-				ne.addEventListener("focusout",function(){neFunc(ne)});}
+		for(ne of document.getElementsByClassName("nameEditor")){ne.addEventListener("change",function(){neFunc(ne)});
+				if(!isMobileDevice)ne.addEventListener("focusout",function(){neFunc(ne)});}
 		for(ntb of document.getElementsByClassName("newTaskBtn")){ntb.addEventListener("click",function(){ntbFunc(ntb)});}
 		for(cb of document.getElementsByClassName("collapseBtn")){cb.addEventListener("click",function(){cbFunc(cb)});}
 		for(rm of document.getElementsByClassName("removeBtn")){rm.addEventListener("click",function(){rmFunc(rm)});}
