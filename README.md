@@ -1,8 +1,8 @@
 # TaskList
 
-**STATUS: Seems to be working correctly on Chrome. Hasn't been tested on other browsers**
+**STATUS: Seems to be working as intended on Chrome (Desktop and Mobile). Hasn't been tested on other browsers**
 
-A simple task list made in HTML. All of the code is embedded into the HTML, so that it can work offline.
+A simple task list made in HTML. All of the code is embedded into the HTML, so all that is need is the single file.
 
 The base HTML contains a *Save* link and a sample Task.
 
