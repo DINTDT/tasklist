@@ -109,6 +109,7 @@
 		};
 		for(task of document.getElementsByClassName("task")){
 			task.children[1].addEventListener("click",function(){nbFunc(this)});
+			task.children[2].value=task.children[1].innerText;
 			task.children[2].addEventListener("change",function(){neFunc(this)});
 			if(!isMobileDevice())task.children[2].addEventListener("focusout",function(){neFunc(this)});
 			task.children[3].addEventListener("click",function(){ntbFunc(this)});
