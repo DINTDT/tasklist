@@ -6,7 +6,7 @@
 			<span class="nameBox">Click here to rename the task!</span>
 			<input class="nameEditor" style="display:none";></input>
 			<button class="newTaskBtn">&#x002B;</button>
-			<button class="collapseBtn" data-state="shown">&#x25BC;</button>
+			<button class="collapseBtn" data-state="shown">&#x25B2;</button>
 			<button class="removeBtn" style="display:none">&#x2715;</button>
 			<div class="taskChildren"></div>
 		</div>
@@ -55,8 +55,8 @@
 		
 		newcb=document.createElement("button");
 		newcb.className="collapseBtn";
-		newcb.dataset.state="expanded";
-		newcb.innerHTML="\u25BC";
+		newcb.dataset.state="shown";
+		newcb.innerHTML="\u25B2";
 		newT.appendChild(newcb);
 		
 		newrm=document.createElement("button");
@@ -70,7 +70,7 @@
 		
 		newnb.addEventListener("click",function(){nbFunc(this)});
 		newne.addEventListener("change",function(){neFunc(this)});
-		if(!isMobileDevice)newne.addEventListener("focusout",function(){neFunc(this)});
+		if(!isMobileDevice())newne.addEventListener("focusout",function(){neFunc(this)});
 		newntb.addEventListener("click",function(){ntbFunc(this)});
 		newcb.addEventListener("click",function(){cbFunc(this)});
 		newrm.addEventListener("click",function(){rmFunc(this)});
@@ -105,14 +105,16 @@
 			if(filename==null)return;
 			saveBtn.download=filename+".html";
 			this.href="data:text/html;charset=UTF-8,"+encodeURIComponent(document.documentElement.outerHTML);
+			filename=null;
 		};
-		tasks=document.getElementsByClassName("task");
-		for(nb of document.getElementsByClassName("nameBox")){nb.addEventListener("click",function(){nbFunc(nb)});}
-		for(ne of document.getElementsByClassName("nameEditor")){ne.addEventListener("change",function(){neFunc(ne)});
-				if(!isMobileDevice)ne.addEventListener("focusout",function(){neFunc(ne)});}
-		for(ntb of document.getElementsByClassName("newTaskBtn")){ntb.addEventListener("click",function(){ntbFunc(ntb)});}
-		for(cb of document.getElementsByClassName("collapseBtn")){cb.addEventListener("click",function(){cbFunc(cb)});}
-		for(rm of document.getElementsByClassName("removeBtn")){rm.addEventListener("click",function(){rmFunc(rm)});}
+		for(task of document.getElementsByClassName("task")){
+			task.children[1].addEventListener("click",function(){nbFunc(this)});
+			task.children[2].addEventListener("change",function(){neFunc(this)});
+			if(!isMobileDevice())task.children[2].addEventListener("focusout",function(){neFunc(this)});
+			task.children[3].addEventListener("click",function(){ntbFunc(this)});
+			task.children[4].addEventListener("click",function(){cbFunc(this)});
+			task.children[5].addEventListener("click",function(){rmFunc(this)});
+		};
 	};
 	</script>
 </html>
