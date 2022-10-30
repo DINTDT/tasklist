@@ -2,7 +2,7 @@
 	<style>
 		*{font-family:sans-serif;}
 		body{margin:0;}
-		button{border:0;height:2em;width:2em;background:cornflowerblue}
+		button{border:0;height:1.5rem;width:1.5rem;background:cornflowerblue}
 		button:hover:not(:disabled){background:royalblue;}
 		.active{background:lightblue;}
 		.active>.taskChildren{background:lightcyan}
@@ -13,49 +13,61 @@
 		.nameeditor{margin:0 1em}
 		.highlightCleared .task[data-check="true"]{background:turquoise}
 		.highlightCleared .task[data-check="true"].active{background:cadetblue;}
-		.taskChildren{background:white}
+		.taskChildren{background:inherit}
 		.task>*{vertical-align:middle}
+		.descriptionBox{padding:0.2rem 1rem;background:inherit;border-left:3rem solid cornflowerblue;color:#668}
+		.descriptionBox.hidden{display:none}
+		.descriptionBox input{width:100%}
 		#toolbar{background:cornflowerblue;padding:0.5em 0 0.5em;}
-		#saveBtn{text-decoration:none;color:white;padding:0.5em}
-		#saveBtn:hover{background:royalblue;}
+		#saveBtn, #loadBtn{text-decoration:none;color:white;padding:0.5em}
+		#saveBtn:hover, #loadBtn:hover{background:royalblue;}
 		#taskList{margin-top:0.5em}
 		#help{position:fixed;display:none;right:0;border:royalblue 2px solid;background:lightcyan;padding:0.3em}
 		#helpTable{font-size:0.8em;}
 		#helpTable td{padding:0.3em;}
+		#loadInput{display:none}
 	</style>
 	<body>
 		<div id="toolbar">
-			<a id="saveBtn" href="#">Save this tasklist</a>
-			<span style="float:right;color:white;font-style:italic">Press H for keyboard shortcuts</span>
+			<a id="saveBtn" href="#">Save</a>
+			<a id="loadBtn" href="#">Load</a>
+			<span style="float:right;color:white;font-style:italic;margin-right:1em">Press H for keyboard shortcuts</span>
 		</div>
 		<div id="help">
 			<div style="text-align:center">Keyboard shortcuts:</div>
 			<table id="helpTable">
-				<tr><td>&#x1f80a;</td><td>Expand subtasks</td><td>Shift+&#x1f80a;</td><td>Go to parent task's next task</td><td>Ctrl+&#x1f80a;</td><td>Expand all tasks</td></tr>
-				<tr><td>&#x1f808;</td><td>Collapse subtasks</td><td>Shift+&#x1f808;</td><td>Go to parent task</td><td>Ctrl+&#x1f808;</td><td>Collapse parent task</td></tr>
-				<tr><td>&#x1f809;</td><td>Move up the task list</td><td>Shift+&#x1f809;</td><td>Go to previous sibling</td><td>Ctrl+&#x1f809;</td><td>Move to the top</td></tr>
-				<tr><td>&#x1f80b;</td><td>Move down the task list</td><td>Shift+&#x1f80b;</td><td>Go to next sibling</td><td>Ctrl+&#x1f80b;</td><td>Move to the bottom</td></tr>
-				<tr><td>Enter</td><td>Mark/Unmark task</td><td>Shift + Enter</td><td>Rename task</td><td>Ctrl+Enter</td><td>Highlight completed tasks</td></tr>
-				<tr><td>Space</td><td>Create subtask</td><td>Shift + Space</td><td>Create subtask (stay in current task)</td><td>Ctrl + Space</td><td>Remove task</td></tr>
+				<tr><td>&#x1f80a;</td><td>Expand subtasks</td><td>Shift+&#x1f80a;</td><td>Go to parent task's next task</td><td>Ctrl+&#x1f80a;</td><td>Expand all tasks</td><td>Ctrl+Shift+&#x1f80a;</td><td>Show description</td></tr>
+				<tr><td>&#x1f808;</td><td>Collapse subtasks</td><td>Shift+&#x1f808;</td><td>Go to parent task</td><td>Ctrl+&#x1f808;</td><td>Collapse parent task</td><td>Ctrl+Shift+&#x1f808;</td><td>Hide description</td></tr>
+				<tr><td>&#x1f809;</td><td>Move up the task list</td><td>Shift+&#x1f809;</td><td>Go to previous sibling</td><td>Ctrl+&#x1f809;</td><td>Move to the top</td><td>Ctrl+Shift+&#x1f809;</td><td>Hide all descriptions</td></tr>
+				<tr><td>&#x1f80b;</td><td>Move down the task list</td><td>Shift+&#x1f80b;</td><td>Go to next sibling</td><td>Ctrl+&#x1f80b;</td><td>Move to the bottom</td><td>Ctrl+Shift+&#x1f80b;</td><td>Show all descriptions</td></tr>
+				<tr><td>Enter</td><td>Check/Uncheck task</td><td>Shift + Enter</td><td>Rename task</td><td>Ctrl+Enter</td><td>Highlight completed tasks</td><td>Ctrl+Shift+Enter</td><td>&mdash;</td></tr>
+				<tr><td>Space</td><td>Create subtask</td><td>Shift + Space</td><td>Create subtask (stay in current task)</td><td>Ctrl + Space</td><td>Remove task</td><td>Ctrl+Shift+Space</td><td>Edit descriptions</td></tr>
 			</table>
 		</div>
 		<div id="taskList">
 			<div class="task active" id="root" data-level=0 data-check="false">
-				<button class="removeBtn" disabled>&#x2716;</button><button class="newTaskBtn">&#x271A;</button><input class="check" type="checkbox"></input><span class="nameBox">[Click here to rename!]</span><input class="nameEditor" style="display:none";></input><button class="collapseBtn" data-state="shown" disabled>&#x25B2;</button><div class="taskChildren"></div>
+				<button class="removeBtn" disabled>&#x2716;</button><button class="newTaskBtn">&#x271A;</button><input class="check" type="checkbox"></input><span class="nameBox">[Click here to rename!]</span><input class="nameEditor" style="display:none";></input><button class="collapseBtn" data-state="shown" disabled>&#x25B2;</button>
+				<div class="descriptionBox hidden">[Click to edit this task's description]</div>
+				<div class="taskChildren"></div>
 			</div>
 		</div>
 	</body>
 	<script>
-		var editingName=false,helpShown=false;
-		const I_CHK=2,I_NBX=3,I_NED=4,I_NTB=1,I_CBT=5,I_RBT=0,I_CHL=6;
+		var editingText=false,helpShown=false;
+		const I_CHK=2,I_NBX=3,I_NED=4,I_NTB=1,I_CBT=5,I_RBT=0,I_DSB=6,I_CHL=7;
 		
 		function isMobileDevice(){
 			return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);};
-			
+		function get(id){
+			return document.getElementById(id)}
 		function subtasksOf(t){
 			return t.children[I_CHL].children;}
+		function firstSubtaskOf(t){
+			return t.children[I_CHL].children[0];}
+		function lastSubtaskOf(t){
+			return t.children[I_CHL].children[t.children[I_CHL].children.length-1]}
 		function subtaskCount(t){
-			return subtasksOf(t).length;}
+			return t.children[I_CHL].children.length;}
 		function getActive(){
 			return document.getElementsByClassName("active")[0];}
 		function prevSibOf(t){
@@ -68,9 +80,6 @@
 			return t.children[I_CBT].dataset.state;}
 		function levelOf(t){
 			return t.dataset.level;}
-			
-		function lastSubtaskOf(t){
-			return subtasksOf(t)[subtaskCount(t)-1];}
 		
 		function findPrevTask(){
 			active=getActive();
@@ -84,7 +93,7 @@
 		function findNextTask(){
 			active=getActive();
 			if(subtaskCount(active)>0 && collapseState(active)=="shown")
-				return subtasksOf(active)[0];
+				return firstSubtaskOf(active);
 			else if (nextSibOf(active)==null){
 				ancestor=active;
 				while(nextSibOf(ancestor)==null){
@@ -109,14 +118,14 @@
 			t.children[I_NBX].style.display="none";
 			t.children[I_NED].style.display="inline";
 			t.children[I_NED].focus();
-			editingName=true;
+			editingText=true;
 			setActive(t);};	
 		neFunc=function(self){
 			t=self.parentElement;
 			t.children[I_NBX].innerText=t.children[I_NED].value==""?"[Click here to rename!]":t.children[I_NED].value;
 			t.children[I_NBX].style.display="inline";
 			t.children[I_NED].style.display="none";
-			editingName=false;
+			editingText=false;
 			setActive(t);};
 		ntbFunc=function(self,setActive=true){
 			t=self.parentElement;
@@ -152,6 +161,11 @@
 				newcb.disabled=true;
 				newcb.innerHTML="\u25B2";
 				newT.appendChild(newcb);
+			newdb=document.createElement("div");
+				newdb.className="descriptionBox hidden";
+				newdb.innerText="[Click to edit this task's description]";
+				newdb.style.paddingLeft=parseInt(newT.dataset.level)+0.5+"REM";
+				newT.appendChild(newdb);
 			newch=document.createElement("div");
 				newch.className="taskChildren";
 				newT.appendChild(newch);
@@ -161,7 +175,8 @@
 			if(!isMobileDevice())newne.addEventListener("focusout",function(){neFunc(this)});
 			newntb.addEventListener("click",function(){ntbFunc(this)});
 			newcb.addEventListener("click",function(){cbFunc(this)});
-			newrm.addEventListener("click",function(){rmFunc(this)});
+			newdb.addEventListener("click",function(){dbFunc(this)});
+			newrm.addEventListener("click",function(){rmFunc(this,false)});
 			t.children[I_CBT].disabled=false;
 			if(setActive)nbFunc(newT.children[I_NTB]);};
 		cbFunc=function(self){
@@ -175,27 +190,48 @@
 				t.children[I_CHL].style.display="block";
 				t.children[I_CBT].innerText="\u25B2";}
 			setActive(t);};
-		rmFunc=function(self){
+		rmFunc=function(self,force=false){
 			t=self.parentElement;
 			if(levelOf(t)>0){
 				if(subtaskCount(t)>0)
-					if(!confirm("This task has subtasks. Remove?")){
+					if(!force&&!confirm("This task has subtasks. Remove?")){
 						setActive(t);
 						return false;}
 				if(subtaskCount(parentOf(t))==1) parentOf(t).children[I_CBT].disabled=true;
+				setActive(parentOf(t))
 				t.remove();
 				return true;}
 			setActive(t);
 			return false;};
+		dbFunc=function(self){
+			let t=self.parentElement;
+			let input=document.createElement("input");
+			let desc=self.innerText;
+			self.innerText="";
+			self.appendChild(input)
+			input.value=desc;
+			input.focus();
+			input.addEventListener("change",function(){
+				let newDesc=this.value;
+				this.remove();
+				self.innerText=newDesc;
+				editingText=false;
+			});
+			editingText=true;
+		}
 			
 		document.onkeydown=function(e){
-			if(!editingName){
+			if(!editingText){
 				document.activeElement.blur();
 				active=getActive();
 				var newActive;
 				switch(e.key){
 					case "ArrowUp":
-						if(e.ctrlKey)
+						if(e.ctrlKey && e.shiftKey)
+							for(d of document.querySelectorAll(".descriptionBox")){
+								d.classList.add("hidden")
+							}
+						else if(e.ctrlKey)
 							newActive=document.getElementById("root");
 						else if(e.shiftKey)
 							newActive=prevSibOf(active);
@@ -203,7 +239,11 @@
 							newActive=findPrevTask();
 						break;
 					case "ArrowDown":
-						if(e.ctrlKey){
+						if(e.ctrlKey && e.shiftKey)
+							for(d of document.querySelectorAll(".descriptionBox")){
+								d.classList.remove("hidden")
+							}
+						else if(e.ctrlKey){
 							newActive=document.getElementById("root");
 							while (subtaskCount(newActive)>0 && collapseState(newActive)=="shown")
 								newActive=lastSubtaskOf(newActive);
@@ -213,11 +253,13 @@
 							newActive=findNextTask();
 						break;
 					case "ArrowRight":
-						if(e.ctrlKey){
+						if(e.ctrlKey && e.shiftKey){
+							active.children[I_DSB].classList.remove("hidden")
+						} else if(e.ctrlKey){
 							for(cb of document.getElementsByClassName("collapseBtn")){
 								cb.dataset.state="hidden";
-								cbFunc(cb);}}
-						else if(e.shiftKey)
+								cbFunc(cb);}
+						} else if(e.shiftKey)
 							newActive=nextSibOf(parentOf(active));
 						else {
 							if(!active.children[I_CBT].disabled){
@@ -225,7 +267,10 @@
 								cbFunc(active.children[0])}}
 						break;
 					case "ArrowLeft":
-						if(e.ctrlKey){
+						if(e.ctrlKey && e.shiftKey){
+							active.children[I_DSB].classList.add("hidden")
+							}
+						else if(e.ctrlKey){
 							if(levelOf(active)!=0){
 								newActive=parentOf(active);
 								newActive.children[I_CBT].dataset.state="shown";
@@ -238,7 +283,9 @@
 						cbFunc(active.children[0])}}
 						break;
 					case "Enter":
-						if(e.shiftKey)
+						if(e.ctrlKey && e.shiftKey)
+							console.log("Ctrl+Shift+Enter")
+						else if(e.shiftKey)
 							nbFunc(active.children[I_NBX]);
 						else if(e.ctrlKey){
 							if(document.body.classList.contains("highlightCleared")) document.body.classList.remove("highlightCleared");
@@ -248,13 +295,18 @@
 							chkFunc(active.children[I_CHK]);}
 						break;
 					case " ":
-						if(e.ctrlKey){
+						if(e.ctrlKey && e.shiftKey){
+							active.children[I_DSB].classList.remove("hidden")
+							dbFunc(active.children[I_DSB])
+						} else if(e.ctrlKey){
 							newActive=findPrevTask();
-							if(!rmFunc(active.children[I_RBT])) return;
+							if(!rmFunc(active.children[I_RBT],false)) return;
 							newActive.classList.add("active");
 							return;}
-						else
+						else{
+							e.preventDefault();
 							ntbFunc(active.children[I_NTB],!e.shiftKey);
+						}
 						break;
 					case "h":
 					case "H":
@@ -266,16 +318,100 @@
 					setActive(newActive);
 			}
 		};
+
+		function saveTaskList(){
+			let filename=prompt("Save as?");
+			let fileBody=""
+			for(task of document.querySelectorAll(".task")){
+				fileBody+=`${task.dataset.level};${task.children[I_CHK].checked?"X":"-"};${task.children[I_NBX].innerText}\n`
+				fileBody+=`!;${task.children[I_DSB].innerText}\n`}
+			if(filename==null||filename=="")return;
+			saveBtn.download=filename+".txt";
+			saveBtn.href="data:text;charset=UTF-8,"+encodeURIComponent(fileBody);
+		};
+
+		function loadTaskList(){
+			let input=document.createElement("input");
+			input.id="loadInput";
+			input.type="file";
+			input.onchange = e => { 
+				var file = e.target.files[0]; 
+				var reader = new FileReader();
+				reader.readAsText(file,'UTF-8');
+				reader.onload = readerEvent => {
+					//Empty the entire tasklist: Go to root and remove all its children;
+					newActive=document.getElementById("root");
+					for(task of document.querySelectorAll("#root>.taskChildren>.task")){
+						rmFunc(task.children[I_RBT],true);
+					}
+					var content = readerEvent.target.result;
+					level=0;
+					content.replaceAll("\r","");
+					for(line of content.split("\n")){
+						if(line=="")continue;
+						params=line.split(";");
+						if(params[0]=="!"){
+							params.reverse()
+							params.pop();
+							params.reverse();
+							let lDesc=params.join(";")
+							getActive().children[I_DSB].innerText=lDesc
+						} else {
+							lLevel=parseInt(params[0])
+							lCheck=(params[1]=="X"?true:false);
+							//remove the first two elements;
+							params.reverse()
+							params.pop();
+							params.pop();
+							params.reverse();
+							lName=params.join(";")
+							if(lLevel==0){
+								root.children[I_NBX].innerText=lName;
+								root.children[I_CHK].checked=lCheck;
+								chkFunc(root.children[I_CHK]);
+							} else {
+								if(lLevel>level){
+									//ACTIVE is the previously created task
+									//Create a new task beneath the active one
+									ntbFunc(getActive().children[I_NTB],false);
+									//Move to the new task, which is its first child
+									setActive(firstSubtaskOf(getActive()));
+								} else if(lLevel==level){
+									//ACTIVE is previously created task
+									//Create a task that is a sibling to the current task:
+									//Move to parent and make a task there
+									setActive(parentOf(getActive()))
+									ntbFunc(getActive().children[I_NTB],false);
+									//Move to the last subtask of the current task
+									setActive(lastSubtaskOf(getActive()))
+								} else {
+									for(let i=0;i<=level-lLevel;i++){
+										setActive(parentOf(getActive()))
+									}
+									ntbFunc(getActive().children[I_NTB],false);
+									setActive(lastSubtaskOf(getActive()))
+								}
+								//Set the active (i.e. the new one) task's name
+								getActive().children[I_NBX].innerText=lName;
+								//Set the active task's check to the saved checkstate
+								getActive().children[I_CHK].checked=lCheck;
+								chkFunc(getActive().children[I_CHK]);
+								level=lLevel;
+							}
+						}
+						//console.log(`l:[${lLevel}] - c:[${lCheck}] - n:[${lName}]`)
+					}
+					setActive(root)
+				}
+			}
+			input.click();
+		}
 		
 		window.onload=function(){
 			saveBtn=document.getElementById("saveBtn");
-			saveBtn.onclick=function(){
-				filename=prompt("Save as?");
-				if(filename==null)return;
-				saveBtn.download=filename+".html";
-				this.href="data:text/html;charset=UTF-8,"+encodeURIComponent(document.documentElement.outerHTML);
-				filename=null;
-			};
+			saveBtn.onclick=function(){saveTaskList();}
+			loadBtn=document.getElementById("loadBtn");
+			loadBtn.onclick=function(){loadTaskList();}
 			for(task of document.getElementsByClassName("task")){
 				task.children[I_CHK].addEventListener("click",function(){chkFunc(this)});
 				task.children[I_CHK].checked=JSON.parse(task.dataset.check);
@@ -285,7 +421,8 @@
 				if(!isMobileDevice())task.children[I_NED].addEventListener("focusout",function(){neFunc(this)});
 				task.children[I_NTB].addEventListener("click",function(){ntbFunc(this)});
 				task.children[I_CBT].addEventListener("click",function(){cbFunc(this)});
-				task.children[I_RBT].addEventListener("click",function(){rmFunc(this)});
+				task.children[I_DSB].addEventListener("click",function(){dbFunc(this)});
+				task.children[I_RBT].addEventListener("click",function(){rmFunc(this,false)});
 			}
 		};
 	</script>
