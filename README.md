@@ -22,6 +22,6 @@ The *Load* button will prompt with a file upload, which must be a TXT file gener
 L;S;N
 !;D
 ```
-where ```L``` is the task *level* (0 is the root task, 1 would be a direct subtask of it, and so on); ```S``` is either ```-``` or ```X```, whether it is *unchecked* or *checked*, respectively; ```N``` is the task's *name*, which can be any string; and ```D``` is the task's description, which can be any string.
-This pair of lines fully describes a task, and a tasklist file is made of any number of this pair of lines.
-The level of any task cannot be more than 1 higher than the one immediately previous.
+where ```L``` is the task *level* (0 is the root task, 1 would be a direct subtask of it, and so on); ```S``` is either ```-``` or ```X```, whether it is *unchecked* or *checked*, respectively; ```N``` is the task's *name*, which can be any string; and ```D``` is the task's *description*, which can be any string.  
+This pair of lines fully describes a task, and a tasklist file is made of any number of this pair of lines.  
+The level of any task cannot be more than 1 higher than the one immediately previous. The first task &ndash; the root task &ndash; must have level 0.
