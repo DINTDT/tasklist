@@ -15,7 +15,7 @@
 		.highlightCleared .task[data-check="true"].active{background:cadetblue;}
 		.taskChildren{background:inherit}
 		.task>*{vertical-align:middle}
-		.descriptionBox{padding:0.2rem 1rem;background:inherit;border-left:3rem solid cornflowerblue;color:#668}
+		.descriptionBox{padding:0.2rem 1rem;background:inherit;border-left:4.5rem solid cornflowerblue;color:#668}
 		.descriptionBox.hidden{display:none}
 		.descriptionBox input{width:100%}
 		#toolbar{background:cornflowerblue;padding:0.5em 0 0.5em;}
@@ -46,7 +46,7 @@
 		</div>
 		<div id="taskList">
 			<div class="task active" id="root" data-level=0 data-check="false">
-				<button class="removeBtn" disabled>&#x2716;</button><button class="newTaskBtn">&#x271A;</button><input class="check" type="checkbox"></input><span class="nameBox">[Click here to rename!]</span><input class="nameEditor" style="display:none";></input><button class="collapseBtn" data-state="shown" disabled>&#x25B2;</button>
+				<button class="removeBtn" disabled>&#x2716;</button><button class="newTaskBtn">&#x271A;</button><button class="toggleDescBtn">&#x203B;</button><input class="check" type="checkbox"></input><span class="nameBox">[Click here to rename!]</span><input class="nameEditor" style="display:none";></input><button class="collapseBtn" data-state="shown" disabled>&#x25B2;</button>
 				<div class="descriptionBox hidden">[Click to edit this task's description]</div>
 				<div class="taskChildren"></div>
 			</div>
@@ -54,7 +54,7 @@
 	</body>
 	<script>
 		var editingText=false,helpShown=false;
-		const I_CHK=2,I_NBX=3,I_NED=4,I_NTB=1,I_CBT=5,I_RBT=0,I_DSB=6,I_CHL=7;
+		const I_RBT=0,I_NTB=1,I_TDB=2,I_CHK=3,I_NBX=4,I_NED=5,I_CBT=6,I_DSB=7,I_CHL=8;
 		
 		function isMobileDevice(){
 			return (typeof window.orientation !== "undefined") || (navigator.userAgent.indexOf('IEMobile') !== -1);};
@@ -110,25 +110,30 @@
 		}
 		
 		chkFunc=function(self){
-			t=self.parentElement;
+			var t=self.parentElement;
 			t.dataset.check=JSON.parse(t.children[I_CHK].checked);
 			setActive(t);};
 		nbFunc=function(self){
-			t=self.parentElement;
+			var t=self.parentElement;
 			t.children[I_NBX].style.display="none";
 			t.children[I_NED].style.display="inline";
 			t.children[I_NED].focus();
 			editingText=true;
 			setActive(t);};	
+		tdbFunc=function(self){
+			var t=self.parentElement;
+			if(t.children[I_DSB].classList.contains("hidden"))
+				t.children[I_DSB].classList.remove("hidden")
+			else t.children[I_DSB].classList.add("hidden")}
 		neFunc=function(self){
-			t=self.parentElement;
+			var t=self.parentElement;
 			t.children[I_NBX].innerText=t.children[I_NED].value==""?"[Click here to rename!]":t.children[I_NED].value;
 			t.children[I_NBX].style.display="inline";
 			t.children[I_NED].style.display="none";
 			editingText=false;
 			setActive(t);};
 		ntbFunc=function(self,setActive=true){
-			t=self.parentElement;
+			var t=self.parentElement;
 			newT=document.createElement("div");
 				newT.className="task";
 				newT.dataset.level=parseInt(t.dataset.level)+1;
@@ -141,6 +146,10 @@
 				newntb.className="newTaskBtn";
 				newntb.innerHTML="\u271A";
 				newT.appendChild(newntb);
+			toggledescb=document.createElement("button");
+				toggledescb.className="toggleDescBtn";
+				toggledescb.innerHTML="&#x203B;";
+				newT.appendChild(toggledescb);
 			newchk=document.createElement("input");
 				newchk.type="checkbox";
 				newchk.className="check";
@@ -171,6 +180,7 @@
 				newT.appendChild(newch);
 			newchk.addEventListener("click",function(){chkFunc(this)});
 			newnb.addEventListener("click",function(){nbFunc(this)});
+			toggledescb.addEventListener("click",function(){tdbFunc(this)});
 			newne.addEventListener("change",function(){neFunc(this)});
 			if(!isMobileDevice())newne.addEventListener("focusout",function(){neFunc(this)});
 			newntb.addEventListener("click",function(){ntbFunc(this)});
@@ -180,7 +190,7 @@
 			t.children[I_CBT].disabled=false;
 			if(setActive)nbFunc(newT.children[I_NTB]);};
 		cbFunc=function(self){
-			t=self.parentElement;
+			var t=self.parentElement;
 			if(t.children[I_CBT].dataset.state=="shown"){
 				t.children[I_CBT].dataset.state="hidden";
 				t.children[I_CHL].style.display="none";
@@ -191,7 +201,7 @@
 				t.children[I_CBT].innerText="\u25B2";}
 			setActive(t);};
 		rmFunc=function(self,force=false){
-			t=self.parentElement;
+			var t=self.parentElement;
 			if(levelOf(t)>0){
 				if(subtaskCount(t)>0)
 					if(!force&&!confirm("This task has subtasks. Remove?")){
@@ -416,6 +426,7 @@
 				task.children[I_CHK].addEventListener("click",function(){chkFunc(this)});
 				task.children[I_CHK].checked=JSON.parse(task.dataset.check);
 				task.children[I_NBX].addEventListener("click",function(){nbFunc(this)});
+				task.children[I_TDB].addEventListener("click",function(){tdbFunc(this)});
 				task.children[I_NED].value=task.children[I_NBX].innerText;
 				task.children[I_NED].addEventListener("change",function(){neFunc(this)});
 				if(!isMobileDevice())task.children[I_NED].addEventListener("focusout",function(){neFunc(this)});
